@@ -34,7 +34,7 @@ if [ ! -e /app/tmp/cache/usr/local/lib/libjq.so ]; then
   cd jq
 
   echo
-  echo "-----> Build jq"
+  echo "-----> Build jq with onigmo"
 
   autoreconf -fi
   ./configure --enable-shared --disable-maintainer-mode --with-oniguruma=/app/vendor/onigmo-6.2.0
