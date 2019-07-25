@@ -37,7 +37,7 @@ if [ ! -e /app/tmp/cache/usr/local/lib/libjq.so ]; then
   echo "-----> Build jq"
 
   autoreconf -fi
-  ./configure --enable-shared --disable-maintainer-mode
+  ./configure --enable-shared --disable-maintainer-mode --with-oniguruma=/app/vendor/onigmo-6.2.0
   make
   make install DESTDIR=$CACHE_DIR
 fi
