@@ -1,0 +1,57 @@
+#!/bin/bash
+
+BP_DIR=$(cd $(dirname ${0:-}); cd ..; pwd)
+BUILD_DIR=$1
+CACHE_DIR=$2
+PROFILE_PATH="$BUILD_DIR/.profile.d/libjq.sh"
+INSTALL_DIR="$BUILD_DIR/.heroku/vendor/lib"
+
+echo "Create .profile.d"
+mkdir -p "$BUILD_DIR/.profile.d"
+
+# Usage: $ set-env key value
+set-env() {
+  echo "export $1=$2" >> $PROFILE_PATH
+}
+
+cd $BUILD_DIR
+
+cat <<EOF
+-----> Running buildpack https://github.com/voke/heroku-buildpack-libjq-onigmo
+
+BP_DIR = $BUILD_DIR
+BUILD_DIR = $BUILD_DIR
+CACHE_DIR = $CACHE_DIR
+EOF
+
+mkdir -p $INSTALL_DIR
+
+if [ ! -e /app/tmp/cache/usr/local/lib/libjq.so ]; then
+  echo
+  echo "-----> Clone jq"
+
+  git clone https://github.com/voke/jq.git
+  cd jq
+
+  echo
+  echo "-----> Build jq"
+
+  autoreconf -fi
+  ./configure --enable-shared --disable-maintainer-mode
+  make
+  make install DESTDIR=$CACHE_DIR
+fi
+
+mkdir -p $INSTALL_DIR
+rsync -avz /app/tmp/cache/usr/local/lib/ ${INSTALL_DIR}
+set-env LD_LIBRARY_PATH '/app/.heroku/vendor/lib:$LD_LIBRARY_PATH'
+
+echo
+echo "-----> Found installed jq library files:"
+find ${INSTALL_DIR}
+echo
+
+cat >${BP_DIR}/export <<EOF
+export LIBRARY_PATH="/app/tmp/cache/usr/local/lib:\${LIBRARY_PATH}"
+export CPATH="/app/tmp/cache/usr/local/include:\${CPATH}"
+EOF
