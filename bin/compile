@@ -37,7 +37,7 @@ if [ ! -e /app/tmp/cache/usr/local/lib/libjq.so ]; then
   echo "-----> Build jq with onigmo"
 
   autoreconf -fi
-  ./configure --enable-shared --disable-maintainer-mode
+  ./configure --enable-shared --disable-maintainer-mode --disable-docs
   make
   make install DESTDIR=$CACHE_DIR
 fi
